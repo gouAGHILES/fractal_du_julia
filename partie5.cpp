@@ -19,6 +19,11 @@
 #include <stdio.h>
 #include <math.h>
 #include <complex> 
+#include <thread>
+#include <semaphore.h> 
+#include <chrono>
+#include <pthread.h> 
+#include <time.h> 
 
 // taille de l'image
 #define LON 600
@@ -46,12 +51,17 @@ int main(int argc, char * argv[])
 
   image=cv::Mat(LON, LAR, CV_8UC3);
   pthread_t thread_fractale[NB_THREAD];
-
+ 
 
 refresh:
+clock_t t;
+  int f;
+  t = clock();
 for(int i=0;i< NB_THREAD;i++){
     pthread_create (&thread_fractale[i], NULL, fractale, (void*)NULL);
     }
+t = clock() - t;
+  printf ("It took me %d clicks (%f seconds).\n",t,((float)t)/CLOCKS_PER_SEC);
      //Gestion des entrées
   while(char key = cvWaitKey(66)) {
     switch(key){
