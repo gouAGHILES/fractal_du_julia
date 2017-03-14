@@ -1,7 +1,7 @@
 # définition des variables utilise pour la compilation
 CXX= g++
 #SOURCE2= test.cpp
-SOURCE= partie1.cpp
+SOURCE= partie5.cpp
 EXEC= testexec
 #EXEC2=expexec 
 SUP=rm -rf

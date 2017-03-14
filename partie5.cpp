@@ -24,15 +24,20 @@
 #include <chrono>
 #include <pthread.h> 
 #include <time.h> 
+#include <iostream>
+#include <fstream>
 
 // taille de l'image
 #define LON 600
 #define LAR 800   
 
-//nombre de thread
+
 #define iteration_max 150
+//nombre de thread
 #define NB_THREAD 1
 #define N_max 4
+// mutex pour protéger VALEUR
+pthread_mutex_t mutex; 
 
 using namespace std;
 using namespace cv;
@@ -41,34 +46,46 @@ long double reel=0.285,imaginaire=0.01;
 double X = 0;
 double Y = 0;
 
-
+// déclarer la fonction pour la conversion de couleur de HSV vers RGB
 void HSVtoRGB( unsigned char  *r, unsigned char  *g, unsigned char  *b, unsigned char  h, unsigned char  s, unsigned char  v );
+// déclarer la fonction pour la creation de la fractal
 void *fractale(void *arg);
 
 int main(int argc, char * argv[]) 
 	{
 
-
-  image=cv::Mat(LON, LAR, CV_8UC3);
-  pthread_t thread_fractale[NB_THREAD];
- 
-
+// crée une matrice image qui comporte LON ligne et LAR collogne
+image=cv::Mat(LON, LAR, CV_8UC3);
+// Initialiser le mutex !! Important !
+pthread_mutex_init(&mutex, NULL); 
+// Initialiser les thread NB_THREAD est le nombre  de thread utilisé
+pthread_t thread_fractale[NB_THREAD];
+// faire une boucle  
 refresh:
-clock_t t;
+  clock_t t;
   int f;
   t = clock();
-for(int i=0;i< NB_THREAD;i++){
+
+    for(int i=0;i< NB_THREAD;i++){
     pthread_create (&thread_fractale[i], NULL, fractale, (void*)NULL);
     }
+
+// Détruire le mutex
+pthread_mutex_destroy(&mutex); 
 t = clock() - t;
   printf ("It took me %d clicks (%f seconds).\n",t,((float)t)/CLOCKS_PER_SEC);
-     //Gestion des entrées
+
+// je stocke dans la chaîne mon_fichier le nom du fichier à ouvrir
+string mon_fichier = "test.txt";  
+ifstream fichier(mon_fichier.c_str(), ios::in);
+
+//Gestion des entrées
   while(char key = cvWaitKey(66)) {
     switch(key){
       case 'a':
       
 
-      // Modification de la fractale à la volée 
+// Modification de la constante de la fractale 
       reel = reel + 0.1;
       goto refresh;
       break;
@@ -84,11 +101,11 @@ t = clock() - t;
       break;
       case 'p':
       
-      imaginaire = imaginaire - 0.1;
+      imaginaire = imaginaire - 0.05;
       goto refresh;
       break;
 
-      /* Zoom/Dezomm */
+//Utilisation de Zoom/Dezoom 
       case 'd':
       
       X -= 100;
@@ -109,7 +126,8 @@ t = clock() - t;
     break;
     imshow("fractale",image ); 
   }
-  cvDestroyWindow("fractale"); // ferme la fenêtre
+// ferme la fenêtre
+  cvDestroyWindow("fractale"); 
   return 0;
 }
 
@@ -118,14 +136,19 @@ t = clock() - t;
 
 void *fractale(void *arg)
 {
+while(1){
+// attend tant qu'il est vérouillé par un autre thread
+	pthread_mutex_lock(&mutex); 
   std::complex<long double> c (reel,imaginaire);
+
+// Programmation de la fonction de la fractale 
 
   for(int x=0;x<LON;x++){
       for(int y=0;y<LAR;y++){
-// conversion de nore image de -1=>1
+
 long double X1= ((long double)-1 +((long double)(x) *((long double)2/(long double)((LON)-Y))));
 long double Y1= ((long double)-1 +((long double)(y) *((long double)2/(long double)((LAR)-X))));
- std::complex<long double> ZC(Y1,X1); // nouvelle representation de pixel
+ std::complex<long double> ZC(Y1,X1); 
  
  int iteration=0;
         long double norm = std::norm(ZC);
@@ -136,24 +159,29 @@ long double Y1= ((long double)-1 +((long double)(y) *((long double)2/(long doubl
         }
 
 
-        if(iteration==iteration_max && norm<N_max){// definition de la couleur de l'image
+        if(iteration==iteration_max && norm<N_max){
           image.at<Vec3b>(x,y)[0]=0; 
           image.at<Vec3b>(x,y)[1]=0; 
           image.at<Vec3b>(x,y)[2]=0;
         }
        else{
           int couleur=(int)((float)iteration/(float)iteration_max*360);
-          unsigned char brillance=150; //(unsigned char)((float)iteration/(float)ITERATIONMAX*100);
-          unsigned char saturation=150; //(unsigned char)((float)iteration/(float)ITERATIONMAX*100);
+          unsigned char brillance=150; 
+          unsigned char saturation=150; 
           unsigned char r,g,b;
+// definition de la couleur de l'image
 	  HSVtoRGB( & r, & g, & b, couleur, brillance, saturation );
-          image.at<Vec3b>(x,y)[0]=r;   // definitions de la couleur de la fractale
+          image.at<Vec3b>(x,y)[0]=r;   
           image.at<Vec3b>(x,y)[1]=g;
           image.at<Vec3b>(x,y)[2]=b;
       
       }
     }
+
+} 
+pthread_mutex_unlock(&mutex);
   }
+
 return NULL;
 }
 
