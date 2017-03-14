@@ -47,14 +47,14 @@ long double Y= ((long double)-1 +((long double)y *((long double)2/(long double)L
 
 
         if(iteration==iteration_max && norm<N_max){// definition de la couleur de l'image
-          image.at<Vec3b>(x,y)[0]=180; 
-          image.at<Vec3b>(x,y)[1]=180; 
-          image.at<Vec3b>(x,y)[2]=180;
+          image.at<Vec3b>(x,y)[0]=0; 
+          image.at<Vec3b>(x,y)[1]=0; 
+          image.at<Vec3b>(x,y)[2]=0;
         }
        else{
           int couleur=(int)((float)iteration/(float)iteration_max*255);
-          image.at<Vec3b>(x,y)[0]=couleur/10;   // definitions de la couleur de la fractale
-          image.at<Vec3b>(x,y)[1]=couleur/10;
+          image.at<Vec3b>(x,y)[0]=couleur;   // definitions de la couleur de la fractale
+          image.at<Vec3b>(x,y)[1]=couleur;
           image.at<Vec3b>(x,y)[2]=couleur;
       
       }
@@ -71,7 +71,7 @@ int main(int argc, char * argv[])
      while( true )
      {
      	 
-	     imshow("dessin FRACTALE",image ); 
+	     imshow("fractale",image ); 
      	 if(cvWaitKey(5) > 0){
         break;
        }
