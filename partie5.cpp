@@ -27,6 +27,9 @@
 #include <iostream>
 #include <fstream>
 
+
+#include <string>
+
 // taille de l'image
 #define LON 600
 #define LAR 800   
@@ -34,7 +37,7 @@
 
 #define iteration_max 150
 //nombre de thread
-#define NB_THREAD 1
+#define NB_THREAD 4
 #define N_max 4
 // mutex pour protéger VALEUR
 pthread_mutex_t mutex; 
@@ -62,8 +65,9 @@ pthread_mutex_init(&mutex, NULL);
 pthread_t thread_fractale[NB_THREAD];
 // faire une boucle  
 refresh:
+//http://www.cplusplus.com/reference/ctime/clock/
   clock_t t;
-  int f;
+  
   t = clock();
 
     for(int i=0;i< NB_THREAD;i++){
@@ -75,11 +79,17 @@ pthread_mutex_destroy(&mutex);
 t = clock() - t;
   printf ("It took me %d clicks (%f seconds).\n",t,((float)t)/CLOCKS_PER_SEC);
 
-// je stocke dans la chaîne mon_fichier le nom du fichier à ouvrir
-string mon_fichier = "test.txt";  
-ifstream fichier(mon_fichier.c_str(), ios::in);
+// je stocke dans la chaîne mon_fichier le nom du fichier à ouvrir 
+//https://openclassrooms.com/courses/lecture-et-ecriture-dans-les-fichiers-en-c
+ ofstream fichier("text.txt", ios::app);  // on ouvre
+if(fichier)
 
+        {
+ fichier <<  ((float)t) <<";";
+fichier.close();
+}else{ cerr << "Impossible d'ouvrir le fichier !" << endl;}
 //Gestion des entrées
+
   while(char key = cvWaitKey(66)) {
     switch(key){
       case 'a':
