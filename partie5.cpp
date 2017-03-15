@@ -37,7 +37,7 @@
 
 #define iteration_max 150
 //nombre de thread
-#define NB_THREAD 4
+#define NB_THREAD 10
 #define N_max 4
 // mutex pour protéger VALEUR
 pthread_mutex_t mutex; 
@@ -77,7 +77,7 @@ refresh:
 // Détruire le mutex
 pthread_mutex_destroy(&mutex); 
 t = clock() - t;
-  printf ("It took me %d clicks (%f seconds).\n",t,((float)t)/CLOCKS_PER_SEC);
+ // printf ("It took me %d clicks (%f seconds).\n",t,((float)t)/CLOCKS_PER_SEC);
 
 // je stocke dans la chaîne mon_fichier le nom du fichier à ouvrir 
 //https://openclassrooms.com/courses/lecture-et-ecriture-dans-les-fichiers-en-c
@@ -85,7 +85,7 @@ t = clock() - t;
 if(fichier)
 
         {
- fichier <<  ((float)t) <<";";
+ fichier <<  NB_THREAD<<" "<<((float)t) <<";"<<endl;
 fichier.close();
 }else{ cerr << "Impossible d'ouvrir le fichier !" << endl;}
 //Gestion des entrées
